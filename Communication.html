@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Communication Protocol & Encryption Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .module {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 2px solid #e0e7ff;
+            transition: all 0.3s ease;
+        }
+
+        .module:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .module-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sender {
+            border-left: 5px solid #10b981;
+        }
+
+        .receiver {
+            border-left: 5px solid #3b82f6;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .visualization {
+            grid-column: span 2;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .flow-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .flow-step {
+            flex: 1;
+            text-align: center;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 10px;
+            margin: 0 10px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .flow-step.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .flow-arrow {
+            font-size: 24px;
+            color: #667eea;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .message-display {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            border-left: 4px solid #667eea;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .status.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 2px solid #16a34a;
+        }
+
+        .status.error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 2px solid #dc2626;
+        }
+
+        .protocol-info {
+            background: #eff6ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .encryption-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .detail-box {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .binary-display {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            background: #1f2937;
+            color: #10b981;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .visualization {
+                grid-column: span 1;
+            }
+            .flow-container {
+                flex-direction: column;
+            }
+            .flow-step {
+                margin: 10px 0;
+            }
+            .encryption-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Communication Protocol Simulator</h1>
+        <p class="subtitle">Simulating UART Communication with XOR Encryption</p>
+
+        <div class="main-grid">
+            <!-- Sender Module -->
+            <div class="module sender">
+                <div class="module-title">
+                    📤 Sender Module
+                </div>
+                
+                <div class="input-group">
+                    <label for="message">Message to Send:</label>
+                    <textarea id="message" placeholder="Enter your message here..." rows="3">Hello, Secure World!</textarea>
+                </div>
+
+                <div class="input-group">
+                    <label for="encryption-key">Encryption Key (hex):</label>
+                    <input type="text" id="encryption-key" placeholder="e.g., AB12CD34" value="A5B9C3D7" maxlength="16">
+                </div>
+
+                <button class="button" onclick="transmitMessage()">🚀 Encrypt & Transmit</button>
+            </div>
+
+            <!-- Receiver Module -->
+            <div class="module receiver">
+                <div class="module-title">
+                    📥 Receiver Module
+                </div>
+                
+                <div class="input-group">
+                    <label for="received-data">Received Data (encrypted):</label>
+                    <textarea id="received-data" placeholder="Encrypted data will appear here..." rows="3" readonly></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label for="decryption-key">Decryption Key (hex):</label>
+                    <input type="text" id="decryption-key" placeholder="Must match sender key" value="A5B9C3D7" maxlength="16">
+                </div>
+
+                <button class="button" onclick="decryptMessage()">🔓 Decrypt Message</button>
+            </div>
+        </div>
+
+        <!-- Visualization Section -->
+        <div class="visualization">
+            <h2 style="text-align: center; margin-bottom: 20px; color: #333;">📊 Transmission Visualization</h2>
+            
+            <div class="protocol-info">
+                <strong>🔌 UART Protocol Simulation:</strong> Start bit (0) + 8 data bits + Stop bit (1) per byte<br>
+                <strong>🔒 XOR Encryption:</strong> Each byte XORed with repeating key pattern
+            </div>
+
+            <div class="flow-container">
+                <div class="flow-step" id="step1">
+                    <h3>📝 Original Message</h3>
+                    <div id="original-display" class="message-display">Waiting for input...</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step" id="step2">
+                    <h3>🔐 Encrypted Data</h3>
+                    <div id="encrypted-display" class="message-display">Not encrypted yet</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step" id="step3">
+                    <h3>📡 UART Transmission</h3>
+                    <div id="uart-display" class="binary-display">Waiting for transmission...</div>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step" id="step4">
+                    <h3>🔓 Decrypted Result</h3>
+                    <div id="decrypted-display" class="message-display">Not decrypted yet</div>
+                </div>
+            </div>
+
+            <div class="encryption-details">
+                <div class="detail-box">
+                    <h4>📈 Encryption Details</h4>
+                    <div id="encryption-info">Select a message and key to see encryption details</div>
+                </div>
+                <div class="detail-box">
+                    <h4>📊 Transmission Stats</h4>
+                    <div id="transmission-stats">
+                        <p>Bytes transmitted: <span id="bytes-count">0</span></p>
+                        <p>UART frames: <span id="frames-count">0</span></p>
+                        <p>Total bits: <span id="bits-count">0</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="status-display"></div>
+        </div>
+    </div>
+
+    <script>
+        let encryptedData = '';
+        let transmittedData = '';
+
+        function stringToHex(str) {
+            return Array.from(str)
+                .map(c => c.charCodeAt(0).toString(16).padStart(2, '0'))
+                .join('');
+        }
+
+        function hexToString(hex) {
+            let str = '';
+            for (let i = 0; i < hex.length; i += 2) {
+                str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+            }
+            return str;
+        }
+
+        function xorEncrypt(message, key) {
+            const messageHex = stringToHex(message);
+            const keyRepeated = key.repeat(Math.ceil(messageHex.length / key.length)).slice(0, messageHex.length);
+            
+            let encrypted = '';
+            for (let i = 0; i < messageHex.length; i += 2) {
+                const messageByte = parseInt(messageHex.substr(i, 2), 16);
+                const keyByte = parseInt(keyRepeated.substr(i, 2), 16);
+                encrypted += (messageByte ^ keyByte).toString(16).padStart(2, '0');
+            }
+            return encrypted.toUpperCase();
+        }
+
+        function simulateUART(hexData) {
+            let uartBits = '';
+            for (let i = 0; i < hexData.length; i += 2) {
+                const byte = parseInt(hexData.substr(i, 2), 16);
+                const dataBits = byte.toString(2).padStart(8, '0');
+                // UART frame: start bit (0) + 8 data bits + stop bit (1)
+                uartBits += '0' + dataBits + '1 ';
+            }
+            return uartBits.trim();
+        }
+
+        function transmitMessage() {
+            const message = document.getElementById('message').value;
+            const key = document.getElementById('encryption-key').value.replace(/[^0-9A-Fa-f]/g, '');
+
+            if (!message.trim()) {
+                alert('Please enter a message to transmit');
+                return;
+            }
+
+            if (!key || key.length < 2) {
+                alert('Please enter a valid hex encryption key (at least 1 byte)');
+                return;
+            }
+
+            // Clear previous steps
+            document.querySelectorAll('.flow-step').forEach(step => step.classList.remove('active'));
+
+            // Step 1: Show original message
+            document.getElementById('step1').classList.add('active');
+            document.getElementById('original-display').textContent = message;
+
+            setTimeout(() => {
+                // Step 2: Encrypt
+                document.getElementById('step1').classList.remove('active');
+                document.getElementById('step2').classList.add('active');
+                
+                encryptedData = xorEncrypt(message, key);
+                document.getElementById('encrypted-display').textContent = encryptedData;
+                document.getElementById('received-data').value = encryptedData;
+
+                setTimeout(() => {
+                    // Step 3: UART Transmission
+                    document.getElementById('step2').classList.remove('active');
+                    document.getElementById('step3').classList.add('active');
+                    
+                    const uartBits = simulateUART(encryptedData);
+                    document.getElementById('uart-display').textContent = uartBits;
+
+                    // Update stats
+                    const byteCount = encryptedData.length / 2;
+                    document.getElementById('bytes-count').textContent = byteCount;
+                    document.getElementById('frames-count').textContent = byteCount;
+                    document.getElementById('bits-count').textContent = byteCount * 10; // 10 bits per UART frame
+
+                    // Show encryption details
+                    const encryptionInfo = `
+                        <p><strong>Original:</strong> "${message}"</p>
+                        <p><strong>Hex:</strong> ${stringToHex(message)}</p>
+                        <p><strong>Key:</strong> ${key}</p>
+                        <p><strong>Encrypted:</strong> ${encryptedData}</p>
+                    `;
+                    document.getElementById('encryption-info').innerHTML = encryptionInfo;
+
+                    document.getElementById('step3').classList.remove('active');
+                }, 1000);
+            }, 800);
+        }
+
+        function decryptMessage() {
+            const receivedData = document.getElementById('received-data').value.replace(/[^0-9A-Fa-f]/g, '');
+            const key = document.getElementById('decryption-key').value.replace(/[^0-9A-Fa-f]/g, '');
+
+            if (!receivedData) {
+                alert('No encrypted data to decrypt. Please transmit a message first.');
+                return;
+            }
+
+            if (!key) {
+                alert('Please enter the decryption key');
+                return;
+            }
+
+            // Step 4: Decrypt
+            document.getElementById('step4').classList.add('active');
+
+            try {
+                // XOR decryption (same as encryption with XOR)
+                const decrypted = xorEncrypt(hexToString(receivedData), key);
+                const decryptedMessage = hexToString(decrypted);
+                
+                document.getElementById('decrypted-display').textContent = decryptedMessage;
+
+                // Check if decryption was successful
+                const originalMessage = document.getElementById('message').value;
+                const isSuccessful = decryptedMessage === originalMessage;
+
+                const statusDiv = document.getElementById('status-display');
+                if (isSuccessful) {
+                    statusDiv.innerHTML = '<div class="status success">✅ Transmission Successful - Message integrity verified!</div>';
+                } else {
+                    statusDiv.innerHTML = '<div class="status error">❌ Transmission Error - Decrypted message doesn\'t match original. Check your key!</div>';
+                }
+
+                setTimeout(() => {
+                    document.getElementById('step4').classList.remove('active');
+                }, 2000);
+
+            } catch (error) {
+                document.getElementById('status-display').innerHTML = '<div class="status error">❌ Decryption Error - Invalid data format</div>';
+            }
+        }
+
+        // Auto-sync encryption keys
+        document.getElementById('encryption-key').addEventListener('input', function() {
+            document.getElementById('decryption-key').value = this.value;
+        });
+
+        document.getElementById('decryption-key').addEventListener('input', function() {
+            document.getElementById('encryption-key').value = this.value;
+        });
+
+        // Initialize display
+        document.getElementById('original-display').textContent = document.getElementById('message').value;
+    </script>
+</body>
+</html>
